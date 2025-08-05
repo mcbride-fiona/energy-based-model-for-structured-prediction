@@ -1,11 +1,11 @@
 import matplotlib.pyplot as plt
 import torch
+import os
 
-
-def plot_energies(ce):
+def plot_energies(ce, save_path=None):
     fig = plt.figure(dpi=200)
     ax = plt.axes()
-    im = ax.imshow(ce.cpu().T)
+    im = ax.imshow(ce.detach().cpu().T)
     ax.set_xlabel('window locations →')
     ax.set_ylabel('← classes')
     ax.xaxis.set_label_position('top')
@@ -14,11 +14,15 @@ def plot_energies(ce):
     cax = fig.add_axes([ax.get_position().x1+0.01, ax.get_position().y0, 0.02, ax.get_position().height])
     plt.colorbar(im, cax=cax)
 
+    if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(save_path)
+        plt.close()
 
-def plot_pm(pm, path=None):
+def plot_pm(pm, path=None, save_path=None):
     fig = plt.figure(dpi=200)
     ax = plt.axes()
-    im = ax.imshow(pm.cpu().T)
+    im = ax.imshow(pm.detach().cpu().T)    
     ax.set_xlabel('window locations →')
     ax.set_ylabel('← label characters')
     ax.xaxis.set_label_position('top')
@@ -29,3 +33,9 @@ def plot_pm(pm, path=None):
             ax.plot(*path[i], *path[i+1], marker='o', markersize=0.5, linewidth=10, color='r', alpha=1)
     cax = fig.add_axes([ax.get_position().x1+0.01, ax.get_position().y0, 0.02, ax.get_position().height])
     plt.colorbar(im, cax=cax)
+
+    if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        plt.savefig(save_path)
+        plt.close()
+

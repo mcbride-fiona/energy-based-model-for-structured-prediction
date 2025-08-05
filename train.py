@@ -1,9 +1,10 @@
 import torch
 from tqdm import tqdm
 import torch.nn.functional as F
-from utils import path_cross_entropy
 
 def train_ebm_model(model, num_epochs, train_loader, optimizer):
+    device = next(model.parameters()).device
+
     pbar = tqdm(range(num_epochs))
     total_train_loss = 0.0
     sample_count = 0
@@ -16,8 +17,8 @@ def train_ebm_model(model, num_epochs, train_loader, optimizer):
             for i in range(batch_size):
                 optimizer.zero_grad()
 
-                image = images[i].unsqueeze(0).unsqueeze(0).float().to(model.device)
-                target = targets[i].to(model.device)
+                image = images[i].unsqueeze(0).unsqueeze(0).float().to(device)
+                target = targets[i].to(device)
 
                 energies = model(image)
                 ce = build_ce_matrix(energies, target.unsqueeze(0)).squeeze(0)

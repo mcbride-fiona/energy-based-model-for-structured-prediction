@@ -1,0 +1,75 @@
+# === Python ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+*.log
+*.pot
+*.pyc
+*~  
+*.swp
+
+# Byte-compiled / optimized / DLL files
+*.dll
+*.o
+*.obj
+
+# Unit test / coverage reports
+.coverage
+coverage.xml
+htmlcov/
+.cache/
+pytest_cache/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# === Virtual Environments ===
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+
+# === Data & Datasets ===
+data/
+datasets/
+*.csv
+*.tsv
+*.gz
+*.zip
+*.tar
+*.h5
+*.pth
+*.pt
+*.npz
+*.npy
+
+# === Model Checkpoints / Outputs ===
+checkpoints/
+outputs/
+runs/
+wandb/
+*.ckpt
+
+# === IDE / Editor Specific ===
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# === OS files ===
+.DS_Store
+Thumbs.db
+
+# === Matplotlib Cache ===
+.matplotlib/
+
+# === Temporary files ===
+*.tmp
+*.bak
+*.old
+
