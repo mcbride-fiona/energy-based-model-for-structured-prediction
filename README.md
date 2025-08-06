@@ -32,4 +32,6 @@ python main.py --word hello
 
 ---
 
-<pre> ```text Repository Structure ├── main.py # Entry point for training and inference ├── train.py # Training loop and loss functions ├── model.py # SimpleNet model architecture ├── data.py # Synthetic word dataset ├── utils.py # Collate functions and string decoding ├── inference.py # Visualization utilities ├── outputs/ # Generated images from inference └── requirements.txt # Python dependencies ``` </pre>
+```text 
+Repository Structure ├── main.py # Entry point for training and inference ├── train.py # Training loop and loss functions ├── model.py # SimpleNet model architecture ├── data.py # Synthetic word dataset ├── utils.py # Collate functions and string decoding ├── inference.py # Visualization utilities ├── outputs/ # Generated images from inference └── requirements.txt # Python dependencies 
+```
