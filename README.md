@@ -19,7 +19,6 @@ This project was originally inspired by a homework assignment but expanded into 
 ## Quick Start
 
 ### 1. Clone the repository
-```bash
 git clone https://github.com/your-username/energy-based-model-for-structured-prediction.git
 cd energy-based-model-for-structured-prediction
 
@@ -30,3 +29,17 @@ pip install -r requirements.txt
 
 ### 3. Run training and inference
 python main.py --word hello 
+
+---
+
+## Repository Structure
+
+├── main.py                # Entry point for training and inference
+├── train.py               # Training loop and loss functions
+├── model.py               # SimpleNet model architecture
+├── data.py                # Synthetic word dataset
+├── utils.py               # Collate functions and string decoding
+├── inference.py           # Visualization utilities
+├── outputs/               # Generated images from inference
+└── requirements.txt       # Python dependencies
+```bash
