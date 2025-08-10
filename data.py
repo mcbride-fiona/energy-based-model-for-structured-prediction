@@ -4,6 +4,7 @@ import torch
 from torch.utils.data import IterableDataset
 from torchvision import transforms
 from config import FONT_PATH
+import os
 
 class SimpleWordsDataset(IterableDataset):
     def __init__(self, max_length, len=100, jitter=False, noise=False):
@@ -18,7 +19,12 @@ class SimpleWordsDataset(IterableDataset):
 
     def __iter__(self):
         for _ in range(self.len):
-            text = ''.join(random.choices(string.ascii_lowercase, k=self.max_length))
+            # Generate two random words with a length between 2 and max_length
+            len1 = random.randint(2, self.max_length)
+            len2 = random.randint(2, self.max_length)
+            word1 = ''.join(random.choices(string.ascii_lowercase, k=len1))
+            word2 = ''.join(random.choices(string.ascii_lowercase, k=len2))
+            text = f"{word1}-{word2}"  # The text is now two words with a dash between
             yield self.draw_text(text), text
 
     def draw_text(self, text, length=None):
@@ -28,10 +34,17 @@ class SimpleWordsDataset(IterableDataset):
         fnt = ImageFont.truetype(FONT_PATH, 20)
         d = ImageDraw.Draw(img)
         pos = (random.randint(0, 7), 5) if self.jitter else (0, 5)
-        d.text(pos, text, fill=1, font=fnt)
+        d.text(pos, text, fill=255, font=fnt)
+        
+        output_dir = "outputs"
+        os.makedirs(output_dir, exist_ok=True)
+        safe_filename = text.replace(' ', '_').replace('-', '_') + ".png"
+        img.save(os.path.join(output_dir, safe_filename))
+
         img = self.transforms(img)
         img[img > 0] = 1
         if self.noise:
             img += torch.bernoulli(torch.ones_like(img) * 0.1)
             img.clamp_(0, 1)
+            
         return img[0]

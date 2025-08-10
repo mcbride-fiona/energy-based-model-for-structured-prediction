@@ -19,7 +19,7 @@ word = args.word.lower()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # === Dataset and dataloader ===
-dataset = SimpleWordsDataset(2, len=2500, jitter=True)
+dataset = SimpleWordsDataset(6, len=5000, jitter=True) # Recommended: max_length=8, len=5000
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=32, collate_fn=collate_fn)
 
 # === Initialize model and optimizer ===
@@ -27,7 +27,7 @@ model = SimpleNet().to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
 
 # === Train model ===
-train_ebm_model(model, 5, dataloader, optimizer)
+train_ebm_model(model, 10, dataloader, optimizer)
 
 # === Run inference on custom word ===
 img = dataset.draw_text(word).to(device)
