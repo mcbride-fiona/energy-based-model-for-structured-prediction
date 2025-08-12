@@ -35,11 +35,6 @@ class SimpleWordsDataset(IterableDataset):
         d = ImageDraw.Draw(img)
         pos = (random.randint(0, 7), 5) if self.jitter else (0, 5)
         d.text(pos, text, fill=255, font=fnt)
-        
-        output_dir = "outputs"
-        os.makedirs(output_dir, exist_ok=True)
-        safe_filename = text.replace(' ', '_').replace('-', '_') + ".png"
-        img.save(os.path.join(output_dir, safe_filename))
 
         img = self.transforms(img)
         img[img > 0] = 1

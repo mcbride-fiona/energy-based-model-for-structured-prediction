@@ -48,4 +48,3 @@ print("Free energy:", free_energy)
 
 min_indices = energies[0].argmin(dim=-1)
 print("Decoded:", indices_to_str(min_indices))
-
