@@ -1,52 +1,71 @@
 import torch
-from tqdm import tqdm
 import torch.nn.functional as F
 
-def train_ebm_model(model, num_epochs, train_loader, optimizer):
-    device = next(model.parameters()).device
+def train_ebm_model(model, train_loader, optimizer):
+    """
+    Train for a SINGLE epoch (no internal tqdm).
+    The outer loop in main.py controls total epochs and the progress bar.
 
-    pbar = tqdm(range(num_epochs))
-    total_train_loss = 0.0
-    sample_count = 0
+    Args:
+        model: torch.nn.Module
+        train_loader: yields (images [B,H,W], targets [B,T], raw_texts list[str])
+        optimizer: torch optimizer
+
+    Returns:
+        avg_epoch_loss (float)
+    """
+    device = next(model.parameters()).device
     model.train()
 
-    for epoch in pbar:
-        epoch_loss = 0.0
-        for images, targets in train_loader:
-            batch_size = images.size(0)
-            for i in range(batch_size):
-                optimizer.zero_grad()
+    epoch_loss = 0.0
+    sample_count = 0
 
-                image = images[i].unsqueeze(0).unsqueeze(0).float().to(device)
-                target = targets[i].to(device)
+    for images, targets, _texts in train_loader:
+        batch_size = images.size(0)
 
-                energies = model(image)
-                ce = build_ce_matrix(energies, target.unsqueeze(0)).squeeze(0)
+        # Current training is per-sample; easy to vectorize later
+        for i in range(batch_size):
+            optimizer.zero_grad()
 
-                free_energy, path, _, _ = find_path(ce)
+            image = images[i].unsqueeze(0).unsqueeze(0).float().to(device)  # [1,1,H,W]
+            target = targets[i].to(device)                                  # [T]
 
-                loss = path_cross_entropy(ce, path)
-                loss.backward()
-                optimizer.step()
+            energies = model(image)    # [1,L,C]
+            ce = build_ce_matrix(energies, target.unsqueeze(0)).squeeze(0)  # [L,T]
 
-                epoch_loss += loss.item()
-                total_train_loss += loss.item()
-                sample_count += 1
+            free_energy, path, _, _ = find_path(ce)
 
-        pbar.set_postfix({"avg_loss": total_train_loss / sample_count})
+            loss = path_cross_entropy(ce, path)
+            loss.backward()
+            optimizer.step()
 
-    return total_train_loss / sample_count
+            epoch_loss += loss.item()
+            sample_count += 1
+
+    return epoch_loss / max(sample_count, 1)
+
 
 def build_ce_matrix(energies, targets):
+    """
+    energies: [B, L, C] raw energies per window and class
+    targets:  [B, T]    target class indices (BETWEEN-separated sequence)
+    Returns:  [B, L, T] per-(window, target-position) cross-entropy matrix.
+    """
     B, L, C = energies.shape
     T = targets.shape[1]
-    log_probs = F.log_softmax(-energies, dim=-1)
+    log_probs = F.log_softmax(-energies, dim=-1)         # convert energies to log-probs
     log_probs_exp = log_probs.unsqueeze(2).expand(B, L, T, C)
     index = targets.unsqueeze(1).expand(B, L, T).unsqueeze(-1)
     gathered_log_probs = log_probs_exp.gather(dim=3, index=index).squeeze(-1)
-    return -gathered_log_probs
+    return -gathered_log_probs  # cross-entropy per (L,T)
+
 
 def find_path(pm):
+    """
+    Dynamic programming to find the lowest-cost monotonic path through pm[L,T].
+    Moves: stay (advance in L), or diagonal (advance in L and T).
+    Returns (free_energy, path, dp, diag).
+    """
     L, T = pm.shape
     dp = pm.new_full((L, T), float('inf'))
     diag = torch.zeros((L, T), dtype=torch.bool, device=pm.device)
@@ -85,7 +104,11 @@ def find_path(pm):
     path.reverse()
     return dp[L-1, T-1].item(), path, dp, diag
 
+
 def path_cross_entropy(ce, path):
+    """
+    Accumulate cross-entropy along the chosen path.
+    """
     total = ce[0, 0] * 0.0
     for l, t in path:
         total += ce[l, t]
