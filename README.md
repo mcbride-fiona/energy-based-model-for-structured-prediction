@@ -16,19 +16,25 @@ This project was originally inspired by a homework assignment but expanded into 
 
 ---
 
-## Quick Start
+## Quick Start for MacOS
 
 ### 1. Clone the repository
 git clone https://github.com/your-username/energy-based-model-for-structured-prediction.git
+
 cd energy-based-model-for-structured-prediction
 
 ### 2. Set up your environment
 python -m venv venv
+
 source venv/bin/activate
+
 pip install -r requirements.txt
 
-### 3. Run training and inference
-python main.py --word hello 
+### 3. Run training (not necessary)
+python main.py --epochs 5 --batch-size 32
+
+### 4. Run inference
+python main.py --skip-train --checkpoint outputs/checkpoints/best.pth --word "your-words"
 
 ---
 ```bash
