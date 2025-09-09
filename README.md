@@ -1,6 +1,6 @@
 # Image-to-Text with Energy-Based Models
 
-This project implements and trains an **energy-based model (EBM)** for structured sequence decoding tasks using synthetic word images. It demonstrates how EBMs can be used to infer discrete structured outputs—like character sequences—from high-dimensional inputs such as images, using differentiable energy functions and dynamic programming.
+This project implements and trains an **energy-based model (EBM)** for structured sequence decoding tasks using synthetic word images. It demonstrates how EBMs can be used to infer discrete structured outputs—like character sequences—from high-dimensional inputs such as images, using differentiable energy functions and dynamic programming. Instead of predicting characters with a softmax at each time step, we learn an energy landscape over latent “window × class” decisions, and then use dynamic programming (DP) to find low-energy alignments and to decode full words.
 
 ---
 
@@ -31,7 +31,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 ### 3. Run training (not necessary)
-python main.py --epochs 5 --batch-size 32
+python main.py --epochs 1 --batch-size 32
 
 ### 4. Run inference
 python main.py --skip-train --checkpoint outputs/checkpoints/best.pth --word "your-words"
@@ -39,13 +39,21 @@ python main.py --skip-train --checkpoint outputs/checkpoints/best.pth --word "yo
 ---
 ```bash
 Repository Structure
-├── main.py           # Entry point for training and inference
-├── train.py          # Training loop and loss functions
-├── model.py          # SimpleNet model architecture
-├── data.py           # Synthetic word dataset
-├── utils.py          # Collate functions and string decoding
-├── inference.py      # Visualization utilities
-├── outputs/          # Generated images from inference
-├── fonts/            # Font used to generate images of words
-└── requirements.txt  # Python dependencies
+├── main.py           # Entry point: trains (N epochs), logs char acc, then decodes --word
+├── train.py          # Trainer + DP utilities + decoder + logger + config snapshot
+│   ├── train_ebm_model()     # One-epoch training loop (backprop on DP-aligned CE)
+│   ├── build_ce_matrix()     # [B,L,T] CE from energies and target indices
+│   ├── find_path()           # DP to find minimal-cost path over CE (free energy)
+│   ├── path_cross_entropy()  # Sum along the DP path (the training loss)
+│   ├── decode_segmented()    # DP segmentation + per-segment letter choice (inference)
+│   ├── evaluate_char_acc()   # Char accuracy on a loader using decode_segmented
+│   ├── TrainLogger           # CSV logger + simple PNG plot (no pandas dependency)
+│   └── save_config()         # Dump run config to outputs/config.json
+├── model.py          # SimpleNet CNN
+├── data.py           # SimpleWordsDataset: renders synthetic word images
+├── utils.py          # transform_word() + collate_fn() (returns images, targets, raw_texts)
+├── inference.py      # plot utilities: energy heatmap + path (for gold targets)
+├── config.py         # token constants (ALPHABET_SIZE, BETWEEN, DASH) + FONT_PATH
+├── outputs/          # logs, plots, checkpoints
+└── requirements.txt  # dependencies
 ```
